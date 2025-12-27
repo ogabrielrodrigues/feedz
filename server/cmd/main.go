@@ -1,35 +1,66 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/ogabrielrodrigues/hackaton-minerva/server/config"
-	"github.com/ogabrielrodrigues/hackaton-minerva/server/config/logger"
-	"github.com/ogabrielrodrigues/hackaton-minerva/server/middleware"
-	"github.com/ogabrielrodrigues/hackaton-minerva/server/router"
+	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/api/middleware"
+	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/api/router"
+	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/database"
+	"github.com/phuslu/log"
 )
 
-// @title Minerva Suggestion API
-// @version 1.0
-// @description Minerva Suggestion API
-// @securityDefinitions.apikey Bearer
-// @in header
-// @name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
-// @BasePath /api/v1
 func main() {
 	if err := config.Load(); err != nil {
-		panic(err)
+		log.Error().Err(err)
 	}
 
-	rt := chi.NewRouter()
-	middleware.RegisterMiddlewares(rt)
-	router.RegisterRoutes(rt)
+	config := config.GetConfig()
 
-	logger.Info(fmt.Sprintf("server running on %s", config.GetConfig().Port))
-	if err := http.ListenAndServe(config.GetConfig().Port, rt); err != nil {
-		logger.Err("error initializing server", err)
+	dbPool, err := database.NewDatabasePool(config.DatabaseUrl)
+	if err != nil {
+		log.Error().Msgf("erro ao estabelecer conexão com o banco de dados. err=%v", err)
 	}
+
+	handler := router.NewRouter(dbPool)
+
+	handler = middleware.CorsMiddleware(
+		handler,
+		config.JwtSecret,
+	)
+
+	server := &http.Server{
+		Addr:           config.Port,
+		Handler:        handler,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	go func() {
+		log.Info().Msgf("servidor iniciado em: %s", config.Port)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Panic().Msgf("erro ao iniciar servidor. err=%v", err)
+		}
+	}()
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	<-ch
+
+	log.Info().Msg("iniciando encerramento do servidor...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Panic().Msgf("erro ao encerrar o servidor. err=%v", err)
+	}
+
+	log.Info().Msg("servidor encerrado")
 }

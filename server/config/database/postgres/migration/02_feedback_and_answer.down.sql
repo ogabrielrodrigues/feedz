@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS "tb_answers" CASCADE;
-DROP TABLE IF EXISTS "tb_feedbacks" CASCADE;

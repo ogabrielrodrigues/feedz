@@ -12,7 +12,7 @@ hackaton-minerva
 # Environment
 .env
 .env.local
-.env.development
+.example.env
 config.toml
 
 # Logs
@@ -21,6 +21,3 @@ logs.txt
 
 # Tmp
 tmp
-
-# Swagger Docs
-docs

@@ -1,34 +1,34 @@
-.PHONY: default docs run clean build migrate_up migrate_down seed
+include .env
+
+.PHONY: default run clean build migrate-up migrate-down
 
 APP_NAME=hackaton-minerva
-DATABASE_DRIVER=postgres
-DATABASE_URL=$(shell grep -m 1 database config.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-MIGRATIONS_PATH=config/database/${DATABASE_DRIVER}/migration
 
 default: run
 
-docs:
-	@swag init -q -d "./" -g "cmd/main.go"
-
-run: docs
+run:
 	@go run cmd/main.go
 
 clean:
 	@rm -f bin/${APP_NAME}
 
-build: clean docs
+build: clean
 	@go build -C cmd -o ../${APP_NAME}
 
-migrate_up:
-	@docker-compose up -d
-	@migrate -path ${MIGRATIONS_PATH} -database "${DATABASE_URL}" -verbose up
+migrate-up:
+	@DATABASE_HOST="${DATABASE_HOST}" \
+	DATABASE_PORT="${DATABASE_PORT}" \
+	DATABASE_NAME="${DATABASE_NAME}" \
+	DATABASE_USER="${DATABASE_USER}" \
+	DATABASE_PWD="${DATABASE_PWD}" \
+	tern migrate --migrations internal/database/migrations \
+	--config internal/database/migrations/tern.conf
 
-migrate_down:
-	@docker-compose up -d
-	@migrate -path ${MIGRATIONS_PATH} -database "${DATABASE_URL}" -verbose down
-
-seed:
-	@docker exec -it db_minerva \
-	psql -q -U postgres \
-	-d minerva \
-	-f "/mnt/seed/seed.sql"
+migrate-down:
+	DATABASE_HOST="${DATABASE_HOST}" \
+	DATABASE_PORT="${DATABASE_PORT}" \
+	DATABASE_NAME="${DATABASE_NAME}" \
+	DATABASE_USER="${DATABASE_USER}" \
+	DATABASE_PWD="${DATABASE_PWD}" \
+	tern migrate --migrations internal/database/migrations \
+	--config internal/database/migrations/tern.conf -d -1
