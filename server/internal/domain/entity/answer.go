@@ -19,6 +19,7 @@ type Answer struct {
 	AnsweredBy string
 	Content    string
 	AnsweredAt time.Time
+	Active     bool
 }
 
 func NewAnswer(answeredBy, content string) *Answer {

@@ -1,4 +1,4 @@
-# Minerva Feedbacks
+# Minerva Foods - Feedz
 
 ### Projeto desenvolvido durante o evento Congresso InovaAgro e BrutoHacka realizado nos dias 01, 02 e 03 de Abril de 2023.
 
@@ -23,7 +23,7 @@
 #### O desafio foi solucionado com um front-end usando NextJS 14 e TailwindCSS. O back-end, consiste em uma API REST usando Go, PostgreSQL e Docker.
 
 <p align="center">
-  <img class="width:300px" src=".github/2.png"/>
+  <img class="width:300px" src=".github/feedz.svg"/>
 </p>
 
 ### [Ver projeto](https://minervafeedback.vercel.app)

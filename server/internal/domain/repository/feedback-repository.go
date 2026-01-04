@@ -40,6 +40,7 @@ func (fr *feedbackRepository) ListFeedbacks() (*[]dto.FeedbackDto, *httperr.Http
 			&feedback.Answered,
 			&feedback.AnswerID,
 			&feedback.SentAt,
+			&feedback.Active,
 		); err != nil {
 			return nil, httperr.NewInternalServerError(err.Error())
 		}
@@ -88,6 +89,7 @@ func (fr *feedbackRepository) FilterFeedbacks(filters url.Values) (*[]dto.Feedba
 			&feedback.Answered,
 			&feedback.AnswerID,
 			&feedback.SentAt,
+			&feedback.Active,
 		); err != nil {
 			return nil, httperr.NewInternalServerError(err.Error())
 		}
@@ -106,6 +108,19 @@ func (fr *feedbackRepository) CreateFeedback(dto *dto.CreateFeedbackDto) *httper
 		values ($1, $2)`,
 		dto.EmployeeRegistry,
 		dto.Content,
+	); err != nil {
+		return httperr.NewInternalServerError(err.Error())
+	}
+
+	return nil
+}
+
+func (fr *feedbackRepository) DeleteFeedback(feedbackID string) *httperr.HttpError {
+	ctx := context.Background()
+
+	if _, err := fr.database.Exec(ctx,
+		`update feedback set active = false where feedback_id = $1`,
+		feedbackID,
 	); err != nil {
 		return httperr.NewInternalServerError(err.Error())
 	}

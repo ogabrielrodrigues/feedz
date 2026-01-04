@@ -2,7 +2,6 @@ package httperr
 
 import (
 	"net/http"
-	"time"
 )
 
 const (
@@ -17,12 +16,11 @@ const (
 )
 
 type HttpError struct {
-	Code      string                 `json:"code"`
-	HttpCode  int                    `json:"-"`
-	Message   string                 `json:"message"`
-	Context   map[string]interface{} `json:"context,omitempty"`
-	Timestamp time.Time              `json:"timestamp"`
-	Cause     error                  `json:"cause,omitempty"`
+	Code     string                 `json:"code"`
+	HttpCode int                    `json:"-"`
+	Message  string                 `json:"message"`
+	Context  map[string]interface{} `json:"context,omitempty"`
+	Cause    error                  `json:"cause,omitempty"`
 }
 
 func (err HttpError) Error() string {

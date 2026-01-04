@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/ogabrielrodrigues/hackaton-minerva/server/config"
 	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/application/httperr"
 )
 
@@ -34,9 +35,11 @@ func GenerateToken(employeeRegistry string, jwtSecret string) (string, *httperr.
 	return token, nil
 }
 
-func ParseToken(token string, jwtSecret string) (string, *httperr.HttpError) {
+func ParseToken(token string) (string, *httperr.HttpError) {
+	config := config.GetConfig()
+
 	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
+		return []byte(config.JwtSecret), nil
 	})
 
 	if err != nil {

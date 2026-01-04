@@ -63,3 +63,20 @@ func (fh *FeedbackHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	response.End(w, http.StatusCreated)
 }
+
+func (fh *FeedbackHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	feedbackID := r.PathValue("feedbackID")
+	if feedbackID == "" {
+		err := httperr.NewBadRequestError("o parâmetro feedbackID não pode ser inválido")
+		response.Json(w, err.HttpCode, err)
+		return
+	}
+
+	err := fh.repository.DeleteFeedback(feedbackID)
+	if err != nil {
+		response.Json(w, err.HttpCode, err)
+		return
+	}
+
+	response.End(w, http.StatusOK)
+}

@@ -1,23 +1,33 @@
-import { GetEmployee } from '@/hooks/get_employee'
-import { LoginSection } from '@/components/sections/login_section'
-import { FeedbacksSection } from '@/components/sections/feedbacks_section'
+import { Fragment } from "react/jsx-runtime"
+import { FeedbacksSection } from "@/components/feedback/feedbacks-section"
+import { LoginSection } from "@/components/login/login-section"
+import { Header } from "@/components/root/header"
+import { useAuth } from "@/hooks/use-auth"
 
-/**
- * TEST: Admin
- * email: admin@admin.minerva.com
- * password: admin1
- *
- * TEST: Employee
- * email: john@ti.minerva.com
- * password: john01
- **/
+export default async function RootPage({ searchParams }: PageProps<"/">) {
+  const employee = await useAuth()
 
-export default async function HomePage() {
-  const { employee } = await GetEmployee()
+  const filterSector = ((await searchParams).sector as string) ?? ""
 
   return (
-    <main className="h-[calc(100%-86px)] flex flex-col justify-center gap-4 px-5 md:w-1/2 md:mx-auto lg:w-2/5 xl:w-1/5">
-      {!employee ? <LoginSection /> : <FeedbacksSection />}
-    </main>
+    <Fragment>
+      {!employee ? (
+        <div className="flex flex-1">
+          <main className="flex flex-col justify-center w-full px-8 md:w-1/2 md:px-0 md:mx-auto lg:w-2/5 xl:w-1/5">
+            <LoginSection />
+          </main>
+        </div>
+      ) : (
+        <div className="overflow-hidden">
+          <Header />
+
+          <div className="flex flex-1">
+            <main className="flex  flex-col justify-center w-full px-8 md:w-1/2 md:mx-auto lg:w-max">
+              <FeedbacksSection filterSector={filterSector} />
+            </main>
+          </div>
+        </div>
+      )}
+    </Fragment>
   )
 }

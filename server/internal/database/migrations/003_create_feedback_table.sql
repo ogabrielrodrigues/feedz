@@ -4,7 +4,8 @@ create table if not exists feedback (
   content text not null,
   answered boolean default false,
   answer_id uuid references answer (answer_id),
-  sent_at timestamp default now()
+  sent_at timestamp default now(),
+  active boolean default true
 );
 
 ---- create above / drop below ----

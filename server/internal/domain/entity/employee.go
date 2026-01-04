@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"context"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -12,6 +13,7 @@ import (
 
 type EmployeeRepository interface {
 	FindEmployeeByRegistry(registry string) (*dto.EmployeeDto, *httperr.HttpError)
+	FindEmployeeByAuth(ctx context.Context) (*dto.EmployeeDto, *httperr.HttpError)
 	ListEmployees() (*[]dto.EmployeeDto, *httperr.HttpError)
 	CreateEmployee(dto *dto.CreateEmployeeDto) *httperr.HttpError
 	AuthenticateEmployee(dto *dto.AuthenticateEmployeeDto) (*Employee, *httperr.HttpError)
@@ -53,7 +55,11 @@ func (e *Employee) hashPassword() {
 func (e *Employee) ComparePassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(e.Password), []byte(password))
 
-	return err == nil
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 func (e *Employee) Authenticate() (string, *httperr.HttpError) {

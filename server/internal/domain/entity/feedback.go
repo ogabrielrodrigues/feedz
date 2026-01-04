@@ -12,6 +12,7 @@ type FeedbackRepository interface {
 	ListFeedbacks() (*[]dto.FeedbackDto, *httperr.HttpError)
 	FilterFeedbacks(filters url.Values) (*[]dto.FeedbackDto, *httperr.HttpError)
 	CreateFeedback(dto *dto.CreateFeedbackDto) *httperr.HttpError
+	DeleteFeedback(feedbackID string) *httperr.HttpError
 }
 
 type Feedback struct {
@@ -21,6 +22,7 @@ type Feedback struct {
 	Answered         bool
 	AnswerID         string
 	SentAt           time.Time
+	Active           bool
 }
 
 func NewFeedback(employeeRegistry, content string) *Feedback {

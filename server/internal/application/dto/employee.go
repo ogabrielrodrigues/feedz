@@ -22,5 +22,5 @@ type EmployeeDto struct {
 	Sector        string        `json:"sector"`
 	Unit          string        `json:"unit"`
 	Administrator bool          `json:"administrator"`
-	Feedbacks     []FeedbackDto `json:"feedbacks,omitempty"`
+	Feedbacks     []FeedbackDto `json:"feedbacks"`
 }

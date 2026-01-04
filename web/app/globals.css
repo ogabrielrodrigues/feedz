@@ -1,7 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-::-webkit-scrollbar {
-  @apply md:hidden
+:root {
+  --color-primary: oklch(0.6303 0.1969 21.2);
+  --color-primary-foreground: oklch(98.5% 0 0);
+  --color-secondary: oklch(0.3502 0.0325 240.22);
+  --color-background: oklch(96.9% 0.015 12.422);
+  --color-input: oklch(98.5% 0 0);
+  --color-border: oklch(87.1% 0.006 286.286);
+  --color-ring: oklch(0.6303 0.1969 21.2);
+  --color-destructive: oklch(0.6303 0.1969 21.2);
+  --color-muted-foreground: oklch(55.2% 0.016 285.938);
+}
+
+@theme inline {
+  --font-sans: var(--font-montserrat);
+
+  --color-primary: oklch(0.6303 0.1969 21.2);
+  --color-primary-foreground: oklch(98.5% 0 0);
+  --color-secondary: oklch(0.3502 0.0325 240.22);
+  --color-background: oklch(96.9% 0.015 12.422);
+  --color-input: oklch(98.5% 0 0);
+  --color-border: oklch(87.1% 0.006 286.286);
+  --color-ring: oklch(0.6303 0.1969 21.2);
+  --color-destructive: oklch(0.6303 0.1969 21.2);
+  --color-muted-foreground: oklch(55.2% 0.016 285.938);
 }

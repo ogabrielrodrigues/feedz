@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/api/middleware"
 	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/application/dto"
 	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/application/httperr"
 	"github.com/ogabrielrodrigues/hackaton-minerva/server/internal/database"
@@ -18,7 +19,7 @@ func NewEmployeeRepository(database *pgxpool.Pool) entity.EmployeeRepository {
 	return &employeeRepository{database}
 }
 
-func (er *employeeRepository) FindEmployeeByRegistry(registry string) (*dto.EmployeeDto, *httperr.HttpError) {
+func (er *employeeRepository) FindEmployeeByRegistry(employeeRegistry string) (*dto.EmployeeDto, *httperr.HttpError) {
 	ctx := context.Background()
 
 	tx, err := er.database.Begin(ctx)
@@ -27,7 +28,7 @@ func (er *employeeRepository) FindEmployeeByRegistry(registry string) (*dto.Empl
 		return nil, httperr.NewInternalServerError(err.Error())
 	}
 
-	row := tx.QueryRow(ctx, `select * from employee where registry = $1`, registry)
+	row := tx.QueryRow(ctx, `select * from employee where registry = $1`, employeeRegistry)
 
 	employee := dto.EmployeeDto{}
 	var _p string
@@ -45,10 +46,8 @@ func (er *employeeRepository) FindEmployeeByRegistry(registry string) (*dto.Empl
 	}
 
 	rows, err := tx.Query(ctx,
-		`select * from feedback f
-		join employee e on f.employee_registry = e.registry
-	 	where e.registry = $1`,
-		registry)
+		`select * from feedback where employee_registry = $1 and active = true`,
+		employeeRegistry)
 	if err != nil {
 		tx.Rollback(ctx)
 		return nil, httperr.NewInternalServerError(err.Error())
@@ -60,15 +59,90 @@ func (er *employeeRepository) FindEmployeeByRegistry(registry string) (*dto.Empl
 	for rows.Next() {
 		defer rows.Close()
 
-		if err := row.Scan(
+		if err := rows.Scan(
 			&feedback.FeedbackID,
 			&feedback.EmployeeRegistry,
 			&feedback.Content,
 			&feedback.Answered,
 			&feedback.AnswerID,
-			&feedback.SentAt); err != nil {
-			tx.Rollback(ctx)
-			return nil, httperr.NewInternalServerError(err.Error())
+			&feedback.SentAt,
+			&feedback.Active); err != nil {
+			if !database.IsErrNoRows(err) {
+				tx.Rollback(ctx)
+				return nil, httperr.NewInternalServerError(err.Error())
+			}
+		}
+
+		feedbacks = append(feedbacks, feedback)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		tx.Rollback(ctx)
+		return nil, httperr.NewInternalServerError(err.Error())
+	}
+
+	employee.Feedbacks = feedbacks
+
+	return &employee, nil
+}
+
+func (er *employeeRepository) FindEmployeeByAuth(ctx context.Context) (*dto.EmployeeDto, *httperr.HttpError) {
+	employeeRegistry, ok := ctx.Value(middleware.EmployeeRegistryKey).(string)
+	if !ok {
+		return nil, httperr.NewUnauthorizedError("não autorizado")
+	}
+
+	tx, err := er.database.Begin(ctx)
+	if err != nil {
+		tx.Rollback(ctx)
+		return nil, httperr.NewInternalServerError(err.Error())
+	}
+
+	row := tx.QueryRow(ctx, `select * from employee where registry = $1`, employeeRegistry)
+
+	employee := dto.EmployeeDto{}
+	var _p string
+
+	if err := row.Scan(
+		&employee.Registry,
+		&employee.Fullname,
+		&employee.Email,
+		&employee.Sector,
+		&employee.Unit,
+		&employee.Administrator,
+		&_p); err != nil {
+		tx.Rollback(ctx)
+		return nil, httperr.NewInternalServerError(err.Error())
+	}
+
+	rows, err := tx.Query(ctx,
+		`select * from feedback
+		where employee_registry = $1
+		and active = true`,
+		employeeRegistry)
+	if err != nil {
+		tx.Rollback(ctx)
+		return nil, httperr.NewInternalServerError(err.Error())
+	}
+
+	feedbacks := []dto.FeedbackDto{}
+	feedback := dto.FeedbackDto{}
+
+	for rows.Next() {
+		defer rows.Close()
+
+		if err := rows.Scan(
+			&feedback.FeedbackID,
+			&feedback.EmployeeRegistry,
+			&feedback.Content,
+			&feedback.Answered,
+			&feedback.AnswerID,
+			&feedback.SentAt,
+			&feedback.Active); err != nil {
+			if !database.IsErrNoRows(err) {
+				tx.Rollback(ctx)
+				return nil, httperr.NewInternalServerError(err.Error())
+			}
 		}
 
 		feedbacks = append(feedbacks, feedback)
@@ -165,14 +239,14 @@ func (er *employeeRepository) AuthenticateEmployee(dto *dto.AuthenticateEmployee
 		&employee.Administrator,
 		&employee.Password); err != nil {
 		if database.IsErrNoRows(err) {
-			httperr.NewNotFoundError("funcionário não cadastrado com esse e-mail")
+			return nil, httperr.NewNotFoundError("funcionário não cadastrado com esse e-mail")
 		}
 
 		return nil, httperr.NewInternalServerError(err.Error())
 	}
 
 	if match := employee.ComparePassword(dto.Password); !match {
-		httperr.NewForbiddenError("as senhas não coincidem")
+		return nil, httperr.NewForbiddenError("as senhas não coincidem")
 	}
 
 	return &employee, nil

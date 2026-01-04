@@ -31,7 +31,7 @@ func (ar *AnswerRepository) ReplyFeedback(ctx context.Context, replyDto *dto.Rep
 	}
 
 	row := tx.QueryRow(ctx,
-		`insert into answer (answered_by, content, )
+		`insert into answer (answered_by, content)
 		values ($1, $2) returning answer_id`,
 		employeeRegistry, replyDto.Content)
 
@@ -83,6 +83,7 @@ func (ar *AnswerRepository) ListAnswers() (*[]dto.AnswerDto, *httperr.HttpError)
 			&answer.AnsweredBy,
 			&answer.Content,
 			&answer.AnsweredAt,
+			&answer.Active,
 		); err != nil {
 			return nil, httperr.NewInternalServerError(err.Error())
 		}
@@ -98,8 +99,8 @@ func (ar *AnswerRepository) FindAnswerByID(answerID string) (*dto.AnswerDto, *ht
 
 	row := ar.database.QueryRow(ctx,
 		`select a.* from feedback f
-		join answer a on f.answer_id = a.id
-		where a.id = $1`, answerID,
+		join answer a on f.answer_id = a.answer_id
+		where a.answer_id = $1`, answerID,
 	)
 
 	answer := dto.AnswerDto{}
@@ -109,6 +110,7 @@ func (ar *AnswerRepository) FindAnswerByID(answerID string) (*dto.AnswerDto, *ht
 		&answer.AnsweredBy,
 		&answer.Content,
 		&answer.AnsweredAt,
+		&answer.Active,
 	); err != nil {
 		return nil, httperr.NewInternalServerError(err.Error())
 	}

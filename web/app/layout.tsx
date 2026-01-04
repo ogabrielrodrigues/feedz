@@ -1,26 +1,26 @@
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
 import "./globals.css"
-import { Header } from "@/components/header"
+import type { PropsWithChildren } from "react"
+import { Toaster } from "@/components/ui/sonner"
 
-const sans = Montserrat({ subsets: ["latin"], variable: "--font-sans" })
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+})
 
 export const metadata: Metadata = {
-  title: "Hackaton Minerva",
-  description: "Hackaton Minerva",
+  title: "Minerva - Feedz",
+  description: "Minerva - Feedz",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
-        className={`${sans.variable} h-screen w-screen overflow-hidden font-sans antialiased`}
+        className={`${montserrat.variable} h-svh w-svw flex flex-col overflow-x-hidden font-sans antialiased bg-background`}
       >
-        <Header />
+        <Toaster />
         {children}
       </body>
     </html>

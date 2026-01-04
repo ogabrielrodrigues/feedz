@@ -24,7 +24,7 @@ func registerEmployeeRoutes(mux *http.ServeMux, pool *pgxpool.Pool) {
 	handler := factory.NewEmployeeFactory(pool)
 
 	mux.Handle("GET /api/employee/{registry}", middleware.AuthMiddleware(makeHandler(handler.FindEmployeeByRegistry)))
-	mux.Handle("GET /api/employee", middleware.AuthMiddleware(makeHandler(handler.ListEmployees)))
+	mux.Handle("GET /api/employee", middleware.AuthMiddleware(makeHandler(handler.FindEmployeeByAuth)))
 	mux.HandleFunc("POST /api/employee", makeHandler(handler.CreateEmployee))
 	mux.HandleFunc("POST /api/authenticate", makeHandler(handler.AuthenticateEmployee))
 }
@@ -35,6 +35,7 @@ func registerFeedbackRoutes(mux *http.ServeMux, pool *pgxpool.Pool) {
 	mux.Handle("GET /api/feedback", middleware.AuthMiddleware(makeHandler(handler.ListFeedbacks)))
 	mux.Handle("GET /api/feedback/filter", middleware.AuthMiddleware(makeHandler(handler.FilterFeedbacks)))
 	mux.Handle("POST /api/feedback", middleware.AuthMiddleware(makeHandler(handler.Create)))
+	mux.Handle("DELETE /api/feedback/{feedbackID}", middleware.AuthMiddleware(makeHandler(handler.Delete)))
 }
 
 func registerAnswerRoutes(mux *http.ServeMux, pool *pgxpool.Pool) {

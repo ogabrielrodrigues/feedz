@@ -22,7 +22,7 @@ func (ah *AnswerHandler) ReplyFeedback(w http.ResponseWriter, r *http.Request) {
 	body := dto.ReplyFeedbackDto{}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		httpErr := httperr.NewInternalServerError("erro ao decodificar corpo do JSON")
+		httpErr := httperr.NewBadRequestError("erro ao decodificar corpo do JSON")
 		response.Json(w, httpErr.HttpCode, httpErr)
 		return
 	}

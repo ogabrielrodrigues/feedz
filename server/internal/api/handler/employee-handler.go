@@ -37,6 +37,16 @@ func (eh *EmployeeHandler) FindEmployeeByRegistry(w http.ResponseWriter, r *http
 	response.Json(w, http.StatusOK, employee)
 }
 
+func (eh *EmployeeHandler) FindEmployeeByAuth(w http.ResponseWriter, r *http.Request) {
+	employee, err := eh.repository.FindEmployeeByAuth(r.Context())
+	if err != nil {
+		response.Json(w, err.HttpCode, err)
+		return
+	}
+
+	response.Json(w, http.StatusOK, employee)
+}
+
 func (eh *EmployeeHandler) ListEmployees(w http.ResponseWriter, r *http.Request) {
 	employees, err := eh.repository.ListEmployees()
 	if err != nil {
