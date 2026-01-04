@@ -8,6 +8,9 @@
     "start": "next start",
     "check": "npx @biomejs/biome check --write"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
