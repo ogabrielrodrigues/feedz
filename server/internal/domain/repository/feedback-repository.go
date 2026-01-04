@@ -56,7 +56,7 @@ func (fr *feedbackRepository) FilterFeedbacks(filters url.Values) (*[]dto.Feedba
 
 	query := `select f.* from feedback f
 	join employee e
-	on f.employee_registry = e.registry`
+	on f.employee_registry = e.registry and f.active = true`
 
 	var rows pgx.Rows
 	var err error
