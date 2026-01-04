@@ -1,6 +1,6 @@
 "use server"
 
-import type { AdminFilterFormValues } from "@/components/feedback/admin-filter-form"
+import type { AdminFilterFormValues } from "@/components/feedback/admin/admin-filter-form"
 import { environment } from "@/lib/env"
 import { getAuthToken } from "@/lib/jwt"
 import type { Feedback } from "@/types/feedback"
