@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	Port        string
-	Origin      string
-	DatabaseUrl string
-	JwtSecret   string
+	Addr               string
+	Origin             string
+	DbConnectionString string
+	JwtSecret          string
 }
 
 var globalConfig Config
@@ -21,9 +21,9 @@ func Load() error {
 		return fmt.Errorf("erro ao ler as variaveis de ambiente")
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		return fmt.Errorf("variável de ambiente PORT não definida")
+	addr := os.Getenv("ADDR")
+	if addr == "" {
+		return fmt.Errorf("variável de ambiente ADDR não definida")
 	}
 
 	origin := os.Getenv("ORIGIN")
@@ -31,9 +31,9 @@ func Load() error {
 		return fmt.Errorf("variável de ambiente ORIGIN não definida")
 	}
 
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == "" {
-		return fmt.Errorf("variável de ambiente DATABASE_URL não definida")
+	dbConnectionString := os.Getenv("DB_CONNECTION_STRING")
+	if dbConnectionString == "" {
+		return fmt.Errorf("variável de ambiente DB_CONNECTION_STRING não definida")
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -41,9 +41,9 @@ func Load() error {
 		return fmt.Errorf("variável de ambiente JWT_SECRET não definida")
 	}
 
-	globalConfig.Port = port
+	globalConfig.Addr = addr
 	globalConfig.Origin = origin
-	globalConfig.DatabaseUrl = databaseUrl
+	globalConfig.DbConnectionString = dbConnectionString
 	globalConfig.JwtSecret = jwtSecret
 
 	return nil

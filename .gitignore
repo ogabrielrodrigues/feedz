@@ -14,6 +14,7 @@ hackaton-minerva
 .env.local
 .example.env
 config.toml
+squarecloud.app
 
 # Logs
 logs.json

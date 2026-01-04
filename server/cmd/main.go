@@ -22,7 +22,7 @@ func main() {
 
 	config := config.GetConfig()
 
-	dbPool, err := database.NewDatabasePool(config.DatabaseUrl)
+	dbPool, err := database.NewDatabasePool(config.DbConnectionString)
 	if err != nil {
 		log.Error().Msgf("erro ao estabelecer conexão com o banco de dados. err=%v", err)
 	}
@@ -35,7 +35,7 @@ func main() {
 	)
 
 	server := &http.Server{
-		Addr:           config.Port,
+		Addr:           config.Addr,
 		Handler:        handler,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	go func() {
-		log.Info().Msgf("servidor iniciado em: %s", config.Port)
+		log.Info().Msgf("servidor iniciado em: %s", config.Addr)
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
 			log.Panic().Msgf("erro ao iniciar servidor. err=%v", err)
 		}
